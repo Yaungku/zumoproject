@@ -9,13 +9,13 @@ void setup()
 
   // Initialize the reflectance sensors module
   reflectanceSensors.init();
-  
+
   button.waitForButton();
   Serial0.println("The battery voltage is ");
-  Serial0.print(map(analogRead(0), 0, 1023, 0,6));
+  int batteryvalue = map(analogRead(0), 0, 1023, 0,6);
+  Serial0.println(batteryvalue);
   Serial0.println(" V");
-
-  // Turn on LED to indicate we are in calibration mode
+  if (batteryvalue == 6) {
   pinMode(13, OUTPUT);
   digitalWrite(13, HIGH);
 
@@ -42,8 +42,11 @@ void setup()
   Serial0.println("The battery voltage is ");
   Serial0.print(map(analogRead(0), 0, 1023, 0,6));
   Serial0.println(" V");
-  
+
   delay(1000);
+  } else {
+    Serial0.println("The battery is low");
+  }
 }
 
 
