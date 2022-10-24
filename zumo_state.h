@@ -10,13 +10,10 @@
 #include <Pushbutton.h>
 
 #define condition true
-#define port 1
 
 ZumoReflectanceSensorArray reflectanceSensors;
 ZumoMotors motors;
 Pushbutton button(ZUMO_BUTTON);
-#define NUM_SENSORS 6
-unsigned int sensorValues[NUM_SENSORS];
 
 int lastError = 0;
 
