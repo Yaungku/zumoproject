@@ -172,10 +172,7 @@ void credit()
 
 void distin()
 {
-
-}
-
-void highdistin( void stateForwardDI()
+ void stateForwardDI()
 {
   Serial.println("forwardDI");
   Serial0.println("forwardDI");
@@ -263,36 +260,12 @@ void selectState()
   state = next_state;
 
   
-  //if(position == 3000);)
-{
-
+  if(position == 3000);
 }
 
-void Functions()
+void highdistin()
 {
-  switch(step)
-  {
-    case HIGHDISTIN:
-      highdistin();
-      break;
-
-    case DISTIN:
-      distin();
-      break;
-
-    case CREDIT:
-      credit();
-      break;
-
-    case PASS:
-      pass();
-      break;
-    case DONE:
-      stateHalt();
-      break;
-    default:
-      stateHalt();
-  }
+ 
 }
 
 #include "zumo_driver.h"
