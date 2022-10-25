@@ -1,4 +1,3 @@
-
 void setup()
 {
   //Setup the local serial interface
@@ -40,9 +39,8 @@ void setup()
   // Wait for the user button to be pressed and released
   button.waitForButton();
   Serial0.println("The battery voltage is ");
-  Serial0.print(map(analogRead(0), 0, 1023, 0,6));
+  Serial0.print(batteryvalue);
   Serial0.println(" V");
-
   delay(1000);
   } else {
     Serial0.println("The battery is low");
@@ -52,6 +50,6 @@ void setup()
 
 void loop()
 {
-  selectState();
+  functions();
   delay(50);
 }
