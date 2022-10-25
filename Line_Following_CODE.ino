@@ -175,7 +175,95 @@ void distin()
 
 }
 
-void highdistin()
+void highdistin( void stateForwardDI()
+{
+  Serial.println("forwardDI");
+  Serial0.println("forwardDI");
+  motors.setSpeeds(SPEED_MAX, SPEED_MAX);
+}
+
+void stateLeftDI()
+{
+  Serial.println("leftDI");
+  Serial0.println("leftDI");
+  motors.setSpeeds(SPEED_HALT, SPEED_MAX);
+}
+
+void stateRightDI()
+{
+  Serial.println("rightDI");
+  Serial0.println("rightDI");
+  motors.setSpeeds(SPEED_MAX, SPEED_HALT);
+}
+
+void stateHaltDI()
+{
+  Serial.println("haltDI");
+  Serial0.println("haltDI");
+  motors.setSpeeds(SPEED_HALT, SPEED_HALT);
+}
+
+void selectState()
+{
+  position = reflectanceSensors.readLine(sensors);
+
+  if(state == STATE_FORWARDDI)
+  {
+    if(position == 2500)
+    {
+      next_state = STATE_HALTDI;
+    }
+    if(position > 1400)
+    {
+      next_state = STATE_LEFTDI;
+    }
+
+
+    if(position < 1000)
+    {
+      next_state = STATE_RIGHTDI;
+  }
+
+
+  }
+  if(state == STATE_LEFTDI)
+  {
+    if(position == 2500)
+    {
+      next_state = STATE_HALTDI;
+    }
+    if(position < 1400)
+    {
+      next_state = STATE_FORWARDDI;
+    }
+
+  }
+ if(state == STATE_RIGHTDI)
+  {
+    if(position == 2500)
+    {
+      next_state = STATE_HALTDI;
+    }
+    if(position  > 1000 ) // Put your condition here
+    {
+      // Write your desired state here
+      next_state = STATE_FORWARDDI;
+    }
+
+
+  }
+  if (state == STATE_HALT)
+  {
+
+  }
+  state = next_state;
+  }
+  
+  }
+  state = next_state;
+
+  
+  //if(position == 3000);)
 {
 
 }
