@@ -290,7 +290,17 @@ switch(state)
 
 void highdistin()
 {
- 
+ if (2700 > position > 3300)
+ { 
+   next_state = STATE_FORWARD;
+   
+   if(position > 4900)
+   {
+    next_state = STATE_FORWARD;
+   }
+
+   if (position == 2500)
+   
 }
 void Functions()
 {
