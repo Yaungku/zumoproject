@@ -14,6 +14,10 @@
 #define STATE_RIGHT   2
 #define STATE_HALT    3
 #define COINFLIP      4
+#define STATE_FORWARDDI 5
+#define STATE_LEFTDI    6
+#define STATE_RIGHTDI   7
+#define STATE_HALTDI    8
 
 int step = PASS;
 
@@ -259,6 +263,27 @@ void selectState()
   }
   state = next_state;
 
+switch(state)
+  {
+    case STATE_FORWARDDI:
+      stateForwardDI();
+      break;
+
+    case STATE_LEFTDI:
+      stateLeftDI();
+      break;
+
+    case STATE_RIGHTDI:
+      stateRight();
+      break;
+
+    case STATE_HALTDI:
+      stateHaltDI();
+      break;
+      
+    default:
+      stateHalt();
+  }
   
   if(position == 3000);
 }
