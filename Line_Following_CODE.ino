@@ -13,17 +13,36 @@
 #define STATE_LEFT    1
 #define STATE_RIGHT   2
 #define STATE_HALT    3
-#define COINFLIP      4
+
 #define STATE_FORWARDDI 5
 #define STATE_LEFTDI    6
 #define STATE_RIGHTDI   7
 #define STATE_HALTDI    8
 
-int step = PASS;
+#define PASS1 0
+#define PASS2 1
+#define PASS3 2
+
+#define DINS1 0
+#define DINS2 1
+
+#define HDINS1 0
+#define HDINS2 1
+#define HDINS3 2
+
+
+
+int step = CREDIT;
+
+bool undone = true;
 
 int state = STATE_FORWARD;
 
 int next_state = STATE_FORWARD;
+
+int passState = PASS1;
+int dinstState = DINS1;
+int hdinstState = HDINS1;
 
 void stateForward()
 {
@@ -32,18 +51,25 @@ void stateForward()
   motors.setSpeeds(SPEED_MAX, SPEED_MAX);
 }
 
+void stateBackward()
+{
+  Serial.println("forward");
+  Serial0.println("forward");
+  motors.setSpeeds(-SPEED_MAX, -SPEED_MAX);
+}
+
 void stateLeft()
 {
   Serial.println("left");
   Serial0.println("left");
-  motors.setSpeeds(SPEED_HALT, SPEED_MAX);
+  motors.setSpeeds(-SPEED_MAX, SPEED_MAX);
 }
 
 void stateRight()
 {
   Serial.println("right");
   Serial0.println("right");
-  motors.setSpeeds(SPEED_MAX, SPEED_HALT);
+  motors.setSpeeds(SPEED_MAX, -SPEED_MAX);
 }
 
 void stateHalt()
@@ -51,19 +77,6 @@ void stateHalt()
   Serial.println("halt");
   Serial0.println("halt");
   motors.setSpeeds(SPEED_HALT, SPEED_HALT);
-}
-
-void stateCoinFlip()
-{
-  Serial.println("Coin Fliping");
-  Serial0.println("Coin Fliping");
-  int randnum = randomgen();
-  if(value == 0)
-    {
-      motors.setSpeeds(-SPEED_MAX, SPEED_MAX);
-    } else {
-      motors.setSpeeds(SPEED_MAX,- SPEED_MAX);
-    }
 }
 
 int randomgen()
@@ -81,61 +94,81 @@ int randomgen()
 }
 
 
-void selectState()
+void stateCoinFlip()
+{
+  Serial.println("Coin Fliping");
+  Serial0.println("Coin Fliping");
+  int randnum = randomgen();
+  delay(3000);
+  if(randnum == 0)
+    {
+      stateLeft();
+      delay(500);
+      state = STATE_LEFT;
+    } else {
+      stateRight();
+      delay(500);
+      state = STATE_RIGHT;
+    }
+  } 
+
+
+
+void credit()
 {
   position = reflectanceSensors.readLine(sensors);
 
   if(state == STATE_FORWARD)
   {
-    if(position == 2500)
+    if(position > 4900)
     {
       next_state = STATE_HALT;
-    }
+    } else if (position > 4000) 
+    {
+      next_state = STATE_RIGHT;
+     }
     if(position < 2000)
     {
       next_state = STATE_LEFT;
     }
-
-
-    if(position > 4000)
-    {
-      next_state = STATE_RIGHT;
-  }
+      
 
 
   }
-
 
   if(state == STATE_LEFT)
   {
-    if(position == 2500)
+    if(position > 4900)
     {
       next_state = STATE_HALT;
-    }
-    if(position > 3300)
+    } else if (position > 3300)
     {
       next_state = STATE_FORWARD;
     }
+    
 
   }
  if(state == STATE_RIGHT)
   {
-    if(position == 2500)
+    if(position  < 3300)
+    {
+      next_state = STATE_FORWARD;
+    }
+    if(position > 4900)
     {
       next_state = STATE_HALT;
     }
-    if(position  < 3300) // Put your condition here
-    {
-      // Write your desired state here
-      next_state = STATE_FORWARD;
-    }
-
-
+ 
   }
-  if (state == STATE_HALT)
+
+  if(state == STATE_HALT)
   {
-
+    passState = PASS1;
+    step = PASS;
+    Serial0.print("Changing to Pass");
+    
   }
+
   state = next_state;
 
   switch(state)
@@ -155,155 +188,263 @@ void selectState()
     case STATE_HALT:
       stateHalt();
       break;
-    case COINFLIP:
-      stateCoinFlip();
+    default:
+      stateHalt();
+  }
+}
+
+void pass1() 
+{
+  
+  position = reflectanceSensors.readLine(sensors);
+  stateForward();
+  if(position > 2400 && position < 2600) 
+  {
+    stateHalt();
+    stateCoinFlip(); 
+    passState = PASS2; 
+  }
+}
+
+void pass2()
+{
+  position = reflectanceSensors.readLine(sensors);
+
+  if(state == STATE_FORWARD)
+  {
+    if(position > 4900)
+    {
+      next_state = STATE_HALT;
+    } else if (position > 4000) 
+    {
+      next_state = STATE_RIGHT;
+     }
+    if(position < 2000)
+    {
+      next_state = STATE_LEFT;
+    }
+      
+
+
+  }
+
+  if(state == STATE_LEFT)
+  {
+    if(position > 4900)
+    {
+      next_state = STATE_HALT;
+    } else if (position > 3300)
+    {
+      next_state = STATE_FORWARD;
+    }
+    
+
+  }
+ if(state == STATE_RIGHT)
+  {
+    if(position  < 3300)
+    {
+      next_state = STATE_FORWARD;
+    }
+    if(position > 4900)
+    {
+      next_state = STATE_HALT;
+    }
+ 
+  }
+
+  if(state == STATE_HALT)
+  {
+    passState = PASS3;
+  }
+
+  state = next_state;
+
+  switch(state)
+  {
+    case STATE_FORWARD:
+      stateForward();
+      break;
+
+    case STATE_LEFT:
+      stateLeft();
+      break;
+
+    case STATE_RIGHT:
+      stateRight();
+      break;
+
+    case STATE_HALT:
+      stateHalt();
       break;
     default:
       stateHalt();
   }
+  
+}
+
+void pass3()
+{
+  state = DONE;
 }
 
 void pass()
 {
-  selectState();
-
-}
-
-void credit()
-{
-
-}
-
-void distin()
-{
- void stateForwardDI()
-{
-  Serial.println("forwardDI");
-  Serial0.println("forwardDI");
-  motors.setSpeeds(SPEED_MAX, SPEED_MAX);
-}
-
-void stateLeftDI()
-{
-  Serial.println("leftDI");
-  Serial0.println("leftDI");
-  motors.setSpeeds(SPEED_HALT, SPEED_MAX);
-}
-
-void stateRightDI()
-{
-  Serial.println("rightDI");
-  Serial0.println("rightDI");
-  motors.setSpeeds(SPEED_MAX, SPEED_HALT);
-}
-
-void stateHaltDI()
-{
-  Serial.println("haltDI");
-  Serial0.println("haltDI");
-  motors.setSpeeds(SPEED_HALT, SPEED_HALT);
-}
-
-void selectState()
-{
-  position = reflectanceSensors.readLine(sensors);
-
-  if(state == STATE_FORWARDDI)
+  switch(passState)
   {
-    if(position == 2500)
-    {
-      next_state = STATE_HALTDI;
-    }
-    if(position > 1400)
-    {
-      next_state = STATE_LEFTDI;
-    }
-
-
-    if(position < 1000)
-    {
-      next_state = STATE_RIGHTDI;
-  }
-
-
-  }
-  if(state == STATE_LEFTDI)
-  {
-    if(position == 2500)
-    {
-      next_state = STATE_HALTDI;
-    }
-    if(position < 1400)
-    {
-      next_state = STATE_FORWARDDI;
-    }
-
-  }
- if(state == STATE_RIGHTDI)
-  {
-    if(position == 2500)
-    {
-      next_state = STATE_HALTDI;
-    }
-    if(position  > 1000 ) // Put your condition here
-    {
-      // Write your desired state here
-      next_state = STATE_FORWARDDI;
-    }
-
-
-  }
-  if (state == STATE_HALT)
-  {
-
-  }
-  state = next_state;
-  }
-  
-  }
-  state = next_state;
-
-switch(state)
-  {
-    case STATE_FORWARDDI:
-      stateForwardDI();
+    case PASS1:
+      pass1();
+      break;    
+    case PASS2:
+      pass2();
       break;
-
-    case STATE_LEFTDI:
-      stateLeftDI();
+    case PASS3:
+      stateHalt();
       break;
-
-    case STATE_RIGHTDI:
-      stateRight();
-      break;
-
-    case STATE_HALTDI:
-      stateHaltDI();
-      break;
-      
     default:
       stateHalt();
-  }
-  
-  if(position == 3000);
+   }
 }
 
-void highdistin()
+void distin1() 
 {
- if (2700 > position > 3300)
+  position = reflectanceSensors.readLine(sensors);
+  Serial0.println("It is DINST1");
+  Serial0.println(position);
+  
+  if ( position < 2700 && position > 3300)
  { 
    next_state = STATE_FORWARD;
-   
+ }
    if(position > 4900)
    {
     next_state = STATE_FORWARD;
    }
 
    if (position == 2500)
-   
+   {
+      stateBackward();
+      delay(500);
+      dinstState = DINS2;
+   }
 }
-void Functions()
+
+void distin2()
 {
+  position = reflectanceSensors.readLine(sensors);
+  Serial0.println("It is DINST2");
+  Serial0.println(position);
+  
+  if(state == STATE_FORWARD)
+  {
+    if(position == 2500)
+    {
+      next_state = STATE_HALT;
+    }
+    if(position < 4000)
+    {
+      next_state = STATE_LEFT;
+    }
+
+
+    if(position > 4800)
+    {
+      next_state = STATE_RIGHT;
+    }
+    if(sensors[1] > 900 && sensors[4] > 900 && sensors[5] > 900)
+    {
+//      step = CREDIT;
+      
+    }
+
+
+  }
+  if(state == STATE_LEFT)
+  {
+    if(position > 4000)
+    {
+      next_state = STATE_FORWARD;
+    }
+    if(sensors[1] > 900 && sensors[4] > 900 && sensors[5] > 900)
+    {
+//      step = CREDIT;
+      
+    }
+
+  }
+ if(state == STATE_RIGHT)
+  {
+    if(position  < 4800 ) // Put your condition here
+    {
+      // Write your desired state here
+      next_state = STATE_FORWARD;
+    }
+    if(sensors[1] > 900 && sensors[4] > 900 && sensors[5] > 900)
+    {
+//      step = CREDIT;
+      Serial0.println("Changing to Credit");
+    }
+
+
+  }
+  if (state == STATE_HALT)
+  { 
+
+  }
+  
+
+  state = next_state;
+
+  switch(state)
+  {
+    case STATE_FORWARD:
+      stateForward();
+      break;
+
+    case STATE_LEFT:
+      stateLeft();
+      break;
+
+    case STATE_RIGHT:
+      stateRight();
+      break;
+
+    case STATE_HALT:
+      stateBackward();
+      break;
+      
+    default:
+      stateHalt();
+  }
+  
+  
+  
+}
+
+void distin()
+{
+  switch(dinstState) 
+  {
+    case DINS1:
+      distin1();
+      break;
+    case DINS2:
+      distin2();
+      break;
+    default:
+      stateHalt();      
+  }
+  
+}
+
+void highdistin()
+{
+
+}
+
+void functions()
+{
+  
   switch(step)
   {
     case HIGHDISTIN:
@@ -330,5 +471,3 @@ void Functions()
 }
 
 #include "zumo_driver.h"
-
-
